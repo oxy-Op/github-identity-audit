@@ -1,0 +1,1 @@
+{"name":"@identity-audit/api","private":true,"type":"module","dependencies":{"@fastify/cors":"^11.3.0","fastify":"^5.10.0"},"scripts":{"dev":"node --watch src/index.ts","start":"node src/index.ts"}}

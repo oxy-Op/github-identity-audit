@@ -1,0 +1,57 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Local audit data (may contain highly sensitive personal information)
+outputs/
+identity-audit-*/
+audit.sqlite
+audit.sqlite-shm
+audit.sqlite-wal
+report.json
+report.html
+report.redacted.json
+report.redacted.html
+mirrors/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs, caches, and scratch data
+*.log
+work/
+.cache/
+.tools/
+.tmp/
+tmp/
+
+# Agent/editor-local files
+.agents/
+.codex/
+.claude/
+.chats/
+chats/
+conversations/
+transcripts/
+.vscode/
+.idea/
+apps/dashboard/AGENTS.md
+apps/dashboard/CLAUDE.md
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini

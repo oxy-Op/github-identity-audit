@@ -1,0 +1,36 @@
+{
+  "name": "github-identity-audit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first, bounded identity exposure auditing for GitHub repositories and public authored surfaces.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "audit": "node apps/cli/src/index.ts",
+    "serve": "npm --workspace apps/gateway run start",
+    "worker": "node apps/worker/src/index.ts",
+    "test": "node --test packages/*/src/*.test.ts",
+    "check": "tsc --noEmit",
+    "dev:web": "npm --workspace apps/dashboard run dev",
+    "build:web": "npm --workspace apps/dashboard run build",
+    "start:web": "npm --workspace apps/dashboard run start",
+    "dev:api": "npm --workspace apps/gateway run dev",
+    "build:api": "npm --workspace apps/gateway run build:ts",
+    "verify": "npm test && npm run check && npm --workspace apps/gateway test && npm run build:api && npm run build:web"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.10",
+    "typescript": "^5.9.0"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22.6"
+  }
+}

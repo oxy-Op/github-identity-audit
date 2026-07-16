@@ -1,0 +1,38 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
+import { AuditDatabase } from "./index.ts";
+
+test("creates the complete local schema and finalizes an audit", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "identity-audit-db-"));
+  const path = join(directory, "audit.sqlite");
+  const profile = { githubUsername: "sasha-777", names: ["Sasha"], emails: [] };
+  const store = await AuditDatabase.create(path, "https://github.com/sasha-777", profile, [{ value: "Sasha", normalized: "sasha", origin: "user", confidence: 1 }]);
+  const artifact = { id: "blob:abc", type: "git_blob" as const, text: "Created by Sasha", contentHash: "abc", repository: "demo", path: "README.md", occurrences: [{ path: "README.md", commitOid: "commit1" }, { path: "docs/about.md", commitOid: "commit2" }], provenance: {} };
+  store.recordArtifacts([artifact]);
+  store.recordExtractionSignals([artifact], profile);
+  assert.equal(store.getCachedArtifactText("abc"), "Created by Sasha");
+  assert.equal(store.searchArtifacts("Sasha").length, 1);
+  store.recordChunkEmbeddings([{ artifact, chunk: { id: "blob:abc:0", text: "Created by Sasha", tokenEstimate: 4 }, vector: [1, 0, 0] }], "test", "tiny");
+  const hybrid = store.searchHybrid("Sasha", [1, 0, 0], "test", "tiny");
+  assert.equal(hybrid[0]?.artifactId, "blob:abc");
+  assert.equal(hybrid[0]?.semanticScore, 1);
+  store.recordLlmRun("test", "test-model", "completed", { provider: "test", model: "test-model", inputTokens: 10, cachedInputTokens: 0, outputTokens: 2, estimatedCostUsd: 0.001 }, { findings: [] });
+  store.finish({ schemaVersion: "0.1", generatedAt: new Date().toISOString(), target: profile, aliases: [], source: "https://github.com/sasha-777", complete: true, metrics: {}, warnings: [], findings: [] });
+  store.close();
+  const database = new DatabaseSync(path, { readOnly: true });
+  const tables = database.prepare("SELECT name FROM sqlite_master WHERE type IN ('table', 'view')").all().map((row) => String(row.name));
+  assert.ok(tables.includes("artifact_occurrences"));
+  assert.ok(tables.includes("budget_transactions"));
+  assert.equal(database.prepare("SELECT status FROM audits").get()?.status, "completed");
+  assert.equal(database.prepare("SELECT count(*) AS count FROM artifact_occurrences").get()?.count, 2);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM llm_runs").get()?.count, 1);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM budget_transactions").get()?.count, 1);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM chunks").get()?.count, 1);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM embeddings").get()?.count, 1);
+  assert.equal(database.prepare("SELECT count(*) AS count FROM extracted_entities").get()?.count, 2);
+  database.close();
+});

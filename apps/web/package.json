@@ -1,0 +1,1 @@
+{"name":"@identity-audit/web","private":true,"type":"module","dependencies":{"next":"^16.2.10","postcss":"^8.5.10","react":"^19.2.7","react-dom":"^19.2.7"},"scripts":{"dev":"next dev -p 3000","build":"next build","start":"next start -p 3000"}}

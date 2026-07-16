@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["target", "candidates"],
+  "properties": {
+    "target": {"type": "object", "required": ["github_username", "known_aliases"], "properties": {"github_username": {"type": "string"}, "known_aliases": {"type": "array", "items": {"type": "string"}}}},
+    "candidates": {"type": "array", "maxItems": 30, "items": {"type": "object", "required": ["id", "artifact_type", "text"], "properties": {"id": {"type": "string"}, "artifact_type": {"type": "string"}, "repository": {"type": "string"}, "path": {"type": "string"}, "text": {"type": "string"}, "matched_values": {"type": "array", "items": {"type": "string"}}}}}
+  }
+}
